@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+
+<head>
+  <meta charset="utf-8">
+  <title>The Sound Spectrum of Taylor Swift</title>
+  <link href="https://fonts.googleapis.com/css?family=Lato:400,700|Raleway:400,700" rel="stylesheet">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/default.min.css">
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://d3js.org/topojson.v3.min.js"></script>
+  <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+  <style>
+    @font-face {
+      font-family: 'CarlaSans';
+      src: url('./static/fonts/carla-sans.otf') format('opentype');
+    }
+
+    .title {
+      text-align: center;
+      font-family: 'CarlaSans';
+      font-size: 40px;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+
+    .html {
+      zoom: 100%
+    }
+
+    /* background image source: https://www.reddit.com/media?url=https%3A%2F%2Fpreview.redd.it%2Fsaeyj2lv2jya1.jpeg%3Fwidth%3D3013%26format%3Dpjpg%26auto%3Dwebp%26s%3Daba05bb7d4bacce8bf765c560420a2c1f402ab4d */
+    body {
+      font-family: 'Raleway', sans-serif;
+      background: linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.5)), url('./static/images/background.webp');
+      background-size: cover;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      font-size: 20px;
+    }
+
+    h5 {
+      font-size: 22px;
+      margin-bottom: 0px;
+      margin-top: 0px;
+    }
+
+    ul {
+      list-style: none;
+    }
+
+    li {
+      margin: 10px 0;
+      text-indent: -1.3rem;
+    }
+
+    #dance::before {
+      content: "🕺 ";
+    }
+
+    #acoustic::before {
+      content: "🪕 ";
+    }
+
+    #energy::before {
+      content: "⚡ ";
+    }
+
+    #valence::before {
+      content: "🎭 ";
+    }
+
+
+    .container {
+      max-width: 1300px;
+      margin: auto;
+    }
+
+    .diagram-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    p {
+      margin-top: 0;
+    }
+
+    .left {
+      width: 820px;
+      margin-right: 130px;
+    }
+
+    .right {
+      margin-top: 30px;
+    }
+
+    .charts {
+      display: flex;
+      flex-direction: row;
+      margin-right: 100px;
+      margin-top: 20px;
+
+    }
+
+    .chart-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-left: 0px;
+      margin-top: 25px;
+    }
+
+    .circle-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'CarlaSans', sans-serif;
+      margin-top: 30px;
+    }
+
+    #circular-bar {
+      cursor: crosshair;
+
+    }
+
+    .divider {
+      border-top: 2px dotted #bbb;
+      margin: 20px 0;
+    }
+
+    .metric-selection {
+      display: flex;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    .metric-button {
+      background-color: #f0f0f0;
+      border: 2px solid #ddd;
+      padding: 10px 20px;
+      cursor: pointer;
+      outline: none;
+      margin: 5px;
+    }
+
+    .metric-button.active {
+      background-color: #d69190;
+      color: white;
+      border-color: #d69190;
+    }
+
+    #spider-chart {
+      margin-top: 180px;
+    }
+  </style>
+
+</head>
+
+<body>
+  <h3 class="title">The Sound Spectrum of Taylor Swift</h3>
+  <div class="container larger">
+    <div class="diagram-container">
+      <div class="left">
+        <p>Take a look at four Spotify metrics-- danceability, acousticness, energy, and valence-- to explore how
+          Taylor's
+          music has evolved over the years. </p>
+        <ul>
+          <li id="dance"><span style="font-weight: bold;">Danceability:</span> Songs that make you move with the beat
+            score high in
+            this metric.</li>
+          <li id="acoustic"><span style="font-weight: bold;">Acousticness:</span> Songs that primarily feature acoustic
+            rather than
+            electronic instruments score high in this
+            metric.</li>
+          <li id="energy"><span style="font-weight: bold;">Energy:</span> Songs that pulse with power and intensity
+            score
+            high in this
+            metric.</li>
+          <li id="valence"><span style="font-weight: bold;">Valence:</span> Songs with a high valence sound more
+            positive
+            (e.g. happy,
+            cheery, euphoric), while tracks with low
+            valence sound more negative (e.g. sad, depressed, angry).</li>
+        </ul>
+      </div>
+      <div class="right">
+        <h5>How to read the chart</h5>
+        <img src="static/images/diagram.png" alt="instructive diagram"
+          style="width:280px; height:300px; margin-left:-10px;">
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="charts">
+      <div class="chart-container">
+        <p>Select a metric below to visualize the songs across different albums. Then, click on a song to delve into its
+          musical composition.</p>
+        <div class="metric-selection">
+          <button class="metric-button" data-metric="danceability">DANCEABILITY</button>
+          <button class="metric-button" data-metric="acousticness">ACOUSTICNESS</button>
+          <button class="metric-button" data-metric="energy">ENERGY</button>
+          <button class="metric-button" data-metric="valence">VALENCE</button>
+        </div>
+        <div class="circle-container">
+          <svg id="circular-bar" height="550" width="600">
+          </svg>
+        </div>
+      </div>
+      <div id="spider-chart-container">
+        <svg id="spider-chart" width="600" height="600"></svg>
+      </div>
+    </div>
+  </div>
+
+  <script>
+
+    const margin = { top: 0, right: 0, bottom: 0, left: 0 },
+      width = 600 - margin.left - margin.right,
+      height = 550 - margin.top - margin.bottom,
+      innerRadius = 120,
+      outerRadius = Math.min(width, height) / 2 - 50;
+
+    const svg = d3.select("#circular-bar")
+      .append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform", `translate(${width / 2},${height / 2 + margin.top})`);
+
+    function drawChart(selectedMetric, data, albums, positionedData, colorScale) {
+      svg.selectAll("*").remove();
+
+      // draw outer limit circle
+      const strokeWidth = 2;
+      svg.append("circle")
+        .attr("r", outerRadius + strokeWidth / 2)
+        .attr("cx", 0)
+        .attr("cy", 0)
+        .attr("fill", "none")
+        .attr("stroke", "#F9F9F9")
+        .attr("stroke-width", strokeWidth)
+        .attr("stroke-dasharray", "2,3");
+
+      // Referenced code in this guide for circular barplot: https://d3-graph-gallery.com/graph/circular_barplot_basic.html
+
+      // X scale: map song titles to angles
+      const x = d3.scaleBand()
+        .range([0, 2 * Math.PI])
+        .align(0)
+        .domain(data.map(d => d.track_name));
+
+      // Y scale: map metrics to radial distances
+      const y = d3.scaleRadial()
+        .range([innerRadius, outerRadius])
+        .domain([0, d3.max(data, d => +d[selectedMetric])]);
+
+      const hoverInfoGroup = svg.append("g")
+        .attr("class", "hover-info")
+        .style("text-anchor", "middle") // Center the text
+        .attr("transform", `translate(0, 0)`);
+
+      albums.forEach((album, albumIndex) => {
+        const albumData = positionedData.filter(d => d.album_name === album);
+        const startOffset = albumIndex * 0.01; // gap between albums
+
+        const albumGroup = svg.append("g");
+        albumGroup.selectAll("path")
+          .data(albumData)
+          .enter().append("path")
+          .attr("fill", d => colorScale(d.album_name))
+          .attr("d", d3.arc()
+            .innerRadius(innerRadius)
+            .outerRadius(d => y(+d[selectedMetric]))
+            .startAngle(d => x(d.track_name) + startOffset)
+            .endAngle(d => x(d.track_name) + x.bandwidth() + startOffset)
+            .padAngle(0.01) // small gaps between songs within the same album
+            .padRadius(innerRadius))
+          .on("click", function (event, d) {
+            drawSpiderChart(d, colorScale(d.album_name));
+            d3.select("#spider-chart").select("#song-title")
+              .text('"' + d.track_name + '"');
+          })
+          .on("mouseover", function (event, d) {
+            hoverInfoGroup.selectAll("*").remove();
+
+            svg.selectAll("path")
+              .transition()
+              .duration(250)
+              .delay(100)
+              .style("opacity", 0.2);
+
+            d3.select(this)
+              .transition()
+              .duration(100)
+              .style("opacity", 1);
+
+            const groupWidth = 170;
+            const groupHeight = 180;
+
+            const info = hoverInfoGroup.append("foreignObject")
+              .attr("width", groupWidth)
+              .attr("height", groupHeight)
+              .attr("x", -groupWidth / 2.6)
+              .attr("y", -groupHeight / 3.8);
+
+            const songDiv = info.append("xhtml:div")
+              .style("display", "flex")
+              .style("align-items", "center")
+              .style("justify-content", "flex-start")
+              .style("font-family", "'Lato', sans-serif")
+              .style("font-size", "15px");
+
+            // Icon citation: Song icon created by Freepik - Flaticon "https://www.flaticon.com/free-icons/music"</a>
+            songDiv.append("xhtml:img")
+              .attr("src", "static/images/song-icon.png")
+              .style("width", "30px")
+              .style("height", "30px")
+              .style("margin-right", "8px");
+
+            songDiv.append("xhtml:span")
+              .text(d.track_name);
+
+            const albumDiv = info.append("xhtml:div")
+              .style("display", "flex")
+              .style("align-items", "center")
+              .style("justify-content", "flex-start")
+              .style("font-family", "'Lato', sans-serif")
+              .style("font-size", "15px")
+              .style("margin-top", "10px");
+
+            // Icon citation: Album icon created by Freepik - Flaticon "https://www.flaticon.com/free-icons/lp"
+            albumDiv.append("xhtml:img")
+              .attr("src", "static/images/album-icon.png")
+              .style("width", "30px")
+              .style("height", "30px")
+              .style("margin-right", "8px");
+
+            albumDiv.append("xhtml:span")
+              .text(d.album_name);
+
+            const metricDiv = info.append("xhtml:div")
+              .style("display", "flex")
+              .style("align-items", "center")
+              .style("justify-content", "flex-start")
+              .style("font-family", "'Lato', sans-serif")
+              .style("font-size", "15px")
+              .style("margin-top", "12px");
+
+            const metricIcons = {
+              // Dance icon created by Mayor Icons - Flaticon "https://www.flaticon.com/free-icons/enjoy"
+              'danceability': 'static/images/dance-icon.png',
+              // Guitar icon created by Freepik - Flaticon https://www.flaticon.com/free-icons/guitar
+              'acousticness': 'static/images/acoustic-icon.png',
+              // Energy icon created by Freepik - Flaticon https://www.flaticon.com/free-icons/energy
+              'energy': 'static/images/energy-icon.png',
+              // Valence icons created by Lagot Design - Flaticon
+              'valence': 'static/images/valence-icon.png'
+            }[selectedMetric];
+
+            const taylorImages = {
+              'danceability': 'static/images/taylor-dance.webp',
+              'acousticness': 'static/images/taylor-acoustic.webp',
+              'energy': 'static/images/taylor-energy.webp',
+              'valence': 'static/images/taylor-emotion.jpeg'
+            };
+
+            metricDiv.append("xhtml:img")
+              .attr("src", metricIcons)
+              .style("width", "30px")
+              .style("height", "30px")
+              .style("margin-right", "8px")
+
+            metricDiv.append("xhtml:span")
+              .text(d[selectedMetric]);
+
+          })
+
+          .on("mouseout", function () {
+            hoverInfoGroup.selectAll("*").remove();
+            svg.selectAll("path")
+              .transition() // Start a transition
+              .style("opacity", 1);
+          });
+
+      });
+
+      svg.append("g")
+        .selectAll("text")
+        .data(albums)
+        .enter()
+        .append("text")
+        .attr("text-anchor", "middle")
+        .attr("transform", d => {
+          const group = positionedData.filter(dd => dd.album_name === d);
+          const startAngle = x(group[0].track_name) + x.bandwidth() / 2;
+          const endAngle = x(group[group.length - 1].track_name) + x.bandwidth() / 2;
+          const middleAngle = (startAngle + endAngle) / 2;
+          const angleDegrees = (middleAngle * 180 / Math.PI) - 90;
+          return `rotate(${angleDegrees})translate(${outerRadius + 20},0)rotate(${90})`;
+        })
+        .text(d => d)
+        .style("font-size", "12px");
+
+    }
+    let metrics = ["danceability", "acousticness", "energy", "valence"];
+
+    // Referenced this tutorial for radial chart: https://yangdanny97.github.io/blog/2019/03/01/D3-Spider-Chart
+    function angleToCoordinate(angle, value, radialScale) {
+      let x = Math.cos(angle) * radialScale(value);
+      let y = Math.sin(angle) * radialScale(value);
+      return { "x": 300 + x, "y": 300 - y };
+    }
+
+    function getPathCoordinates(data_point, metric, radialScale) {
+      let coordinates = metrics.map((metric, i) => {
+        let angle = (Math.PI / 2) + (2 * Math.PI * i / metrics.length);
+        return angleToCoordinate(angle, data_point[metric], radialScale);
+      });
+      coordinates.push(coordinates[0]);
+      return coordinates;
+    }
+
+    let radialScale = d3.scaleLinear().domain([0, 1]).range([0, 200]);
+    let ticks = [0.2, 0.4, 0.6, 0.8, 1];
+
+    function drawSpiderChart(data_point, fillColor) {
+      let svg = d3.select("#spider-chart");
+      svg.selectAll("*").remove();
+
+      svg.append("text")
+        .attr("id", "song-title")
+        .attr("x", 300)
+        .attr("y", 20)
+        .attr("text-anchor", "middle")
+        .style("font-size", "20px")
+        .style("font-style", "italic")
+        .style("font-weight", "bold")
+        .text("Click a song to view its metrics");
+
+      svg.selectAll("circle")
+        .data(ticks)
+        .enter()
+        .append("circle")
+        .attr("cx", 300)
+        .attr("cy", 300)
+        .attr("fill", "none")
+        .attr("stroke", "gray")
+        .attr("r", d => radialScale(d));
+
+      svg.selectAll(".ticklabel")
+        .data(ticks)
+        .enter()
+        .append("text")
+        .attr("class", "ticklabel")
+        .attr("x", 305)
+        .attr("y", d => 300 - radialScale(d))
+        .text(d => d.toString());
+
+      // calculate angles and coordinates for the metrix axes
+      let angleSlice = Math.PI * 2 / metrics.length;
+      metrics.forEach((metric, index) => {
+        let angle = angleSlice * index;
+        let lineCoord = angleToCoordinate(angle, 1, radialScale);
+
+        svg.append("line")
+          .attr("x1", 300)
+          .attr("y1", 300)
+          .attr("x2", lineCoord.x)
+          .attr("y2", lineCoord.y)
+          .attr("stroke", "black");
+
+        let labelCoord = angleToCoordinate(angle, 1.1, radialScale);
+
+        let rotation = 0;
+        if (metric === "energy") {
+          rotation = -90;
+        }
+        else if (metric === "danceability") {
+          rotation = 90;
+        }
+
+        svg.append("text")
+          .attr("x", labelCoord.x)
+          .attr("y", labelCoord.y)
+          .attr("text-anchor", "middle")
+          .attr("transform", `rotate(${rotation},${labelCoord.x},${labelCoord.y})`)
+          .text(metric);
+
+      });
+
+      let line = d3.line().x(d => d.x).y(d => d.y);
+      svg.append("path")
+        .datum(getPathCoordinates(data_point, metrics, radialScale))
+        .attr("d", line)
+        .attr("stroke-width", 3)
+        .attr("stroke", "black")
+        .attr("fill", fillColor)
+        .attr("stroke-opacity", 3)
+        .attr("opacity", 0.6);
+    }
+
+    const requestData = async function () {
+
+      const data = await d3.csv("static/taylor_album_songs.csv");
+      console.log(data);
+
+      // get rid of unnecessary text
+      data.forEach(d => {
+        d.track_name = d.track_name.replace("(Taylor's Version)", "").trim();
+        d.track_name = d.track_name.replace("[Taylor's Version]", "").trim();
+        d.album_name = d.album_name.replace("(Taylor's Version)", "").trim();
+        d.track_name = d.track_name.replace("[From The Vault]", "").trim();
+      });
+
+      const albums = [...new Set(data.map(d => d.album_name))];
+      console.log(albums)
+
+      const albumColors = [
+        "#00605f", // taylor_swift
+        "#885f00", // fearless
+        "#60005f", // speak_now
+        "#870000", // red
+        "#d6e9ff", // 1989
+        "#303030", // reputation
+        "#fa4988", // lover
+        "#8a8a8a", // folklore
+        "#5f0000", // evermore
+        "#8787af", // midnights
+      ]
+
+      const colorScale = d3.scaleOrdinal()
+        .domain(albums)
+        .range(albumColors);
+
+      let groupedData = d3.group(data, d => d.album_name);
+
+      // flatten grouped data into an array with position and album info
+      let positionedData = [];
+      groupedData.forEach((songs, album) => {
+        songs.forEach(song => positionedData.push({ ...song, album }));
+      });
+
+      d3.selectAll(".metric-button").on("click", function () {
+        d3.selectAll(".metric-button").classed("active", false);
+        d3.select(this).classed("active", true);
+        const selectedMetric = d3.select(this).attr("data-metric");
+        drawChart(selectedMetric, data, albums, positionedData, colorScale);
+      });
+
+      d3.select(".metric-button[data-metric='danceability']").classed("active", true);
+      drawChart('danceability', data, albums, positionedData, colorScale);
+
+    }
+    requestData();
+  </script>
+
+  </div>
+
+</body>
+
+</html>
