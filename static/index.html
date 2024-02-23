@@ -12,7 +12,7 @@
   <style>
     @font-face {
       font-family: 'CarlaSans';
-      src: url('./static/fonts/carla-sans.otf') format('opentype');
+      src: url('./fonts/carla-sans.otf') format('opentype');
     }
 
     .title {
@@ -30,7 +30,7 @@
     /* background image source: https://www.reddit.com/media?url=https%3A%2F%2Fpreview.redd.it%2Fsaeyj2lv2jya1.jpeg%3Fwidth%3D3013%26format%3Dpjpg%26auto%3Dwebp%26s%3Daba05bb7d4bacce8bf765c560420a2c1f402ab4d */
     body {
       font-family: 'Raleway', sans-serif;
-      background: linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.5)), url('./static/images/background.webp');
+      background: linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.5)), url('./images/background.webp');
       background-size: cover;
       background-size: cover;
       background-position: center;
@@ -185,8 +185,7 @@
       </div>
       <div class="right">
         <h5>How to read the chart</h5>
-        <img src="static/images/diagram.png" alt="instructive diagram"
-          style="width:280px; height:300px; margin-left:-10px;">
+        <img src="images/diagram.png" alt="instructive diagram" style="width:280px; height:300px; margin-left:-10px;">
       </div>
     </div>
     <div class="divider"></div>
@@ -311,7 +310,7 @@
 
             // Icon citation: Song icon created by Freepik - Flaticon "https://www.flaticon.com/free-icons/music"</a>
             songDiv.append("xhtml:img")
-              .attr("src", "static/images/song-icon.png")
+              .attr("src", "images/song-icon.png")
               .style("width", "30px")
               .style("height", "30px")
               .style("margin-right", "8px");
@@ -329,7 +328,7 @@
 
             // Icon citation: Album icon created by Freepik - Flaticon "https://www.flaticon.com/free-icons/lp"
             albumDiv.append("xhtml:img")
-              .attr("src", "static/images/album-icon.png")
+              .attr("src", "images/album-icon.png")
               .style("width", "30px")
               .style("height", "30px")
               .style("margin-right", "8px");
@@ -347,20 +346,20 @@
 
             const metricIcons = {
               // Dance icon created by Mayor Icons - Flaticon "https://www.flaticon.com/free-icons/enjoy"
-              'danceability': 'static/images/dance-icon.png',
+              'danceability': 'images/dance-icon.png',
               // Guitar icon created by Freepik - Flaticon https://www.flaticon.com/free-icons/guitar
-              'acousticness': 'static/images/acoustic-icon.png',
+              'acousticness': 'images/acoustic-icon.png',
               // Energy icon created by Freepik - Flaticon https://www.flaticon.com/free-icons/energy
-              'energy': 'static/images/energy-icon.png',
+              'energy': 'images/energy-icon.png',
               // Valence icons created by Lagot Design - Flaticon
-              'valence': 'static/images/valence-icon.png'
+              'valence': 'images/valence-icon.png'
             }[selectedMetric];
 
             const taylorImages = {
-              'danceability': 'static/images/taylor-dance.webp',
-              'acousticness': 'static/images/taylor-acoustic.webp',
-              'energy': 'static/images/taylor-energy.webp',
-              'valence': 'static/images/taylor-emotion.jpeg'
+              'danceability': 'images/taylor-dance.webp',
+              'acousticness': 'images/taylor-acoustic.webp',
+              'energy': 'images/taylor-energy.webp',
+              'valence': 'images/taylor-emotion.jpeg'
             };
 
             metricDiv.append("xhtml:img")
@@ -500,7 +499,7 @@
 
     const requestData = async function () {
 
-      const data = await d3.csv("static/taylor_album_songs.csv");
+      const data = await d3.csv("taylor_album_songs.csv");
       console.log(data);
 
       // get rid of unnecessary text
